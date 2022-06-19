@@ -1,0 +1,74 @@
+version: "3.8"
+
+services:
+  react-frontend:
+    build: ./frontend
+    container_name: react-app-container
+    restart: on-failure
+    networks:
+      - frontend-network
+    ports:
+      - 3001:3000
+    volumes:
+      - '.:/react-app'
+      -  /react-app/node_modules
+    depends_on:
+      - spring-backend
+
+  spring-backend:
+    build: ./pizza-app
+    image: spring-app-img:v1
+    container_name: backend-app-container
+    restart: on-failure
+    networks:
+      - backend-network
+    ports:
+      - 8080:8080
+    environment: 
+      SPRING_APPLICATION_JSON: '{
+        "spring.jpa.hibernate.ddl-auto=create"
+        "spring.datasource.url=jdbc:mysql://mysql-db:3306/pizza_db"
+        "spring.datasource.username=D_Golosov"
+        "spring.datasource.password="
+        "spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver"
+        "spring.jpa.show-sql: true"
+        "spring.jpa.properties.hibernate.format_sql=true"}'
+    stdin_open: true
+    tty: true
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+
+  mysql-db:
+    image: mysql:8.0
+    container_name: Cloud-93666-93658
+    restart: unless-stopped
+    networks:
+      backend-network:
+        ipv4_address: 10.0.10.3
+    volumes:
+      - mysql-db:/var/lib/mysql
+    ports: 
+      - 3307:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: 
+      MYSQL_USER: D_Golosov
+      MYSQL_PASSWORD:  
+      MYSQL_DATABASE: pizza_db
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 40
+
+networks:
+  backend-network:
+    name: Bridge-Zadanie-1
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.10.0/24
+  frontend-network:
+    driver: bridge
+
+volumes:
+  mysql-db:
