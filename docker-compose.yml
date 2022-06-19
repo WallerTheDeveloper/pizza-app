@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   react-frontend:
-    build: ./frontend
+    build: ./react-app
     container_name: react-app-container
     restart: on-failure
     networks:
