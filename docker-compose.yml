@@ -10,20 +10,24 @@ services:
     ports:
       - 3001:3000
     volumes:
-      - '.:/react-app'
       -  /react-app/node_modules
     depends_on:
       - spring-backend
 
   spring-backend:
-    build: ./pizza-app
-    image: spring-app-img:v1
+    build:
+      context: pizza-app
+      dockerfile: Dockerfile
     container_name: backend-app-container
     restart: on-failure
     networks:
       - backend-network
+      - frontend-network
     ports:
       - 8080:8080
+    depends_on:
+      - mysql-db
+        # condition: service_healthy      
     environment: 
       SPRING_APPLICATION_JSON: '{
         "spring.jpa.hibernate.ddl-auto=create"
@@ -35,9 +39,6 @@ services:
         "spring.jpa.properties.hibernate.format_sql=true"}'
     stdin_open: true
     tty: true
-    depends_on:
-      mysql-db:
-        condition: service_healthy
 
   mysql-db:
     image: mysql:8.0
@@ -51,14 +52,13 @@ services:
     ports: 
       - 3307:3306
     environment:
-      MYSQL_ROOT_PASSWORD: 
-      MYSQL_USER: D_Golosov
-      MYSQL_PASSWORD:  
+      MYSQL_ALLOW_EMPTY_PASSWORD: true
+      MYSQL_USER: D_Golosov 
       MYSQL_DATABASE: pizza_db
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 5s
-      retries: 40
+    # healthcheck:
+      # test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      # timeout: 5s
+      # retries: 40
 
 networks:
   backend-network:
