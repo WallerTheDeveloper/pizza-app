@@ -28,7 +28,7 @@ services:
     depends_on:
       - mysql-db
     volumes:
-      - .m2:/root/.m2
+      - /pizza-app:/pizza-app
     environment: 
       SPRING_APPLICATION_JSON: '{
         "spring.jpa.hibernate.ddl-auto : create"

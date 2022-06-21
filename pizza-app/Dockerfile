@@ -1,9 +1,3 @@
-# FROM maven:3.8.4-openjdk-17
-# WORKDIR /pizza-app
-# COPY . .
-# RUN mvn clean install
-# CMD mvn spring-boot:run
-
 FROM maven:3.8.4-openjdk-17 AS MAVEN_BUILD
 COPY pom.xml /build/
 COPY mvnw /build/
@@ -14,11 +8,12 @@ RUN mvn clean install -Dmaven.test.skip=true -Dorg.slf4j.simpleLogger.log.org.ap
 
 FROM openjdk:17-oracle
 WORKDIR /pizza-app
-COPY --from=MAVEN_BUILD /build/target/test-17.jar /app/flow-api.jar
-EXPOSE 5000
+COPY --from=MAVEN_BUILD /build/target/pizza-order-app-0.0.1-SNAPSHOT.jar /pizza-app/flow-api.jar
+# EXPOSE 5000
 ENTRYPOINT [  "java",                                     \
     "-Dfile.encoding=UTF-8",                    \
     "-Djava.security.egd=file:/dev/./urandom",  \
     "-jar",                                     \
     "/pizza-app/test.jar"                        \
     ]
+
